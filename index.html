@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Control de entradas</title>
+<style>
+:root{--bg:#f3f4f8;--fg:#15171f;--mut:#667;--card:#fff;--bd:#d9dce6;--ac:#3b3fd8;--acfg:#fff;--ok:#12994f;--wa:#c77a00;--er:#d12b45;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#101219;--fg:#eceef6;--mut:#99a;--card:#1a1d28;--bd:#2c3040;--ac:#8c90ff;--acfg:#10121a;--ok:#35c574;--wa:#f0a53a;--er:#ff6a80}}
+:root[data-theme="dark"]{--bg:#101219;--fg:#eceef6;--mut:#99a;--card:#1a1d28;--bd:#2c3040;--ac:#8c90ff;--acfg:#10121a;--ok:#35c574;--wa:#f0a53a;--er:#ff6a80}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:520px;margin:0 auto;padding:14px}
+h1{font-size:20px;margin:4px 0 10px}
+nav{display:flex;gap:6px;margin-bottom:12px}
+nav button{flex:1;padding:11px 6px;border:1px solid var(--bd);background:var(--card);color:var(--fg);border-radius:10px;font:inherit;font-weight:600}
+nav button.on{background:var(--ac);color:var(--acfg);border-color:var(--ac)}
+section{display:none}section.on{display:block}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px;margin-bottom:12px}
+label{display:block;font-size:14px;color:var(--mut);margin:8px 0 4px}
+input,textarea{width:100%;padding:11px;border:1px solid var(--bd);border-radius:9px;background:var(--bg);color:var(--fg);font:inherit}
+textarea{min-height:120px;font-family:ui-monospace,Menlo,monospace;font-size:15px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.btn{display:block;width:100%;margin-top:10px;padding:14px;border:0;border-radius:10px;background:var(--ac);color:var(--acfg);font:inherit;font-weight:700}
+.btn.sec{background:transparent;color:var(--fg);border:1px solid var(--bd)}
+.stat{font-size:15px;color:var(--mut);margin:0 0 10px}.stat b{color:var(--fg)}
+#code{font-size:34px;letter-spacing:4px;text-align:center;font-weight:700;text-transform:uppercase;padding:14px}
+#res{margin-top:12px;border-radius:14px;padding:26px 14px;text-align:center;font-weight:800;font-size:32px;background:var(--card);border:1px solid var(--bd);color:var(--mut)}
+#res small{display:block;font-size:15px;font-weight:500;margin-top:6px}
+#res.ok{background:var(--ok);color:#fff;border-color:var(--ok)}
+#res.wa{background:var(--wa);color:#fff;border-color:var(--wa)}
+#res.er{background:var(--er);color:#fff;border-color:var(--er)}
+.item{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--bd)}
+.item code{flex:1;font-size:16px;letter-spacing:1px}
+.tag{font-size:12px;padding:3px 8px;border-radius:20px;border:1px solid var(--bd);color:var(--mut)}
+.tag.u{background:var(--ok);color:#fff;border-color:var(--ok)}
+.mini{padding:7px 10px;border:1px solid var(--bd);background:transparent;color:var(--fg);border-radius:8px;font:inherit;font-size:13px}
+.msg{font-size:14px;color:var(--mut);margin-top:8px}
+</style>
+</head>
+<body>
+<main>
+<h1>Control de entradas</h1>
+<nav>
+  <button data-t="pta" class="on">Puerta</button>
+  <button data-t="lis">Lista</button>
+  <button data-t="gen">Generar</button>
+</nav>
+
+<section id="pta" class="on">
+  <p class="stat" id="st1"></p>
+  <input id="code" placeholder="00000" inputmode="numeric" pattern="[0-9]*" autocomplete="off" autocorrect="off" spellcheck="false">
+  <button class="btn" id="bok">Validar</button>
+  <div id="res">Escribí el código de la entrada</div>
+  <div class="card" style="margin-top:12px">
+    <div class="msg" style="margin:0 0 6px">Últimas validaciones</div>
+    <div id="hist"></div>
+  </div>
+</section>
+
+<section id="lis">
+  <p class="stat" id="st2"></p>
+  <input id="q" placeholder="Buscar código" autocapitalize="characters">
+  <div class="card" id="list" style="margin-top:10px"></div>
+  <button class="btn sec" id="breset">Borrar todo</button>
+</section>
+
+<section id="gen">
+  <div class="card">
+    <div class="row">
+      <div><label for="n">Cantidad</label><input id="n" type="number" min="1" max="1000" value="50"></div>
+      <div><label for="len">Largo del código</label><input id="len" type="number" min="4" max="8" value="5"></div>
+      <div><label for="pre">Prefijo</label><input id="pre" value="RARO" maxlength="10" autocapitalize="characters"></div>
+    </div>
+    <button class="btn" id="bgen">Generar códigos</button>
+    <div class="msg" id="gmsg" style="font-weight:600;color:var(--ok)"></div>
+    <div class="msg">En la puerta alcanza con escribir solo los números; el prefijo se completa solo.</div>
+  </div>
+  <div class="card" id="outc" style="display:none">
+    <label for="out">Códigos nuevos</label>
+    <textarea id="out" readonly></textarea>
+    <button class="btn sec" id="bcopy">Copiar lista</button>
+  </div>
+  <div class="card">
+    <label for="imp">Importar códigos de otra lista, uno por línea</label>
+    <textarea id="imp" placeholder="RARO-48213"></textarea>
+    <button class="btn sec" id="bimp">Importar códigos</button>
+  </div>
+</section>
+</main>
+
+<script>
+const K='ctrl_entradas_v2';
+let S={pre:'RARO',len:5,codes:{},hist:[]};
+try{const x=JSON.parse(localStorage.getItem(K)||'null');if(x&&x.codes)S=Object.assign(S,x)}catch(e){}
+const save=()=>{try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}};
+const $=id=>document.getElementById(id);
+const AL='0123456789';
+const rnd=n=>{const a=new Uint8Array(n);crypto.getRandomValues(a);return[...a].map(x=>AL[x%AL.length]).join('')};
+const norm=s=>String(s||'').trim().toUpperCase().replace(/[\u2010-\u2015\s]+/g,'-').replace(/^-+|-+$/g,'');
+const hora=t=>new Date(t).toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
+
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));
+  document.querySelectorAll('section').forEach(s=>s.classList.toggle('on',s.id===b.dataset.t));
+  stats();render();if(b.dataset.t==='pta')$('code').focus();
+});
+
+function stats(){
+  const v=Object.values(S.codes),t=v.length,u=v.filter(x=>x).length;
+  const h=`Entraron <b>${u}</b> de <b>${t}</b> · faltan <b>${t-u}</b>`;
+  $('st1').innerHTML=h;$('st2').innerHTML=h;
+}
+
+// Puerta
+function result(cls,t,s){const r=$('res');r.className=cls;r.innerHTML=t+(s?`<small>${s}</small>`:'')}
+function beep(f){try{const a=new (window.AudioContext||window.webkitAudioContext)(),o=a.createOscillator();o.frequency.value=f;o.connect(a.destination);o.start();setTimeout(()=>{o.stop();a.close()},150)}catch(e){}}
+function addHist(c,r){S.hist.unshift({c,r,t:Date.now()});S.hist=S.hist.slice(0,6);drawHist()}
+function drawHist(){
+  $('hist').innerHTML=S.hist.length?S.hist.map(h=>`<div class="item"><code>${h.c}</code><span class="tag ${h.r==='OK'?'u':''}">${h.r}</span><span class="msg" style="margin:0">${hora(h.t)}</span></div>`).join(''):'<div class="msg">Todavía no hay validaciones.</div>';
+}
+function validar(){
+  const raw=norm($('code').value);
+  if(!raw)return;
+  const c=[raw,S.pre+'-'+raw].find(x=>S.codes[x]!==undefined);
+  $('code').value='';$('code').focus();
+  if(!c){result('er','NO EXISTE',raw);beep(180);navigator.vibrate&&navigator.vibrate([200,80,200]);addHist(raw,'NO EXISTE');save();return}
+  if(S.codes[c]){result('wa','YA USADA',c+' · entró a las '+hora(S.codes[c]));beep(260);navigator.vibrate&&navigator.vibrate([200,80,200]);addHist(c,'YA USADA');save();return}
+  S.codes[c]=Date.now();save();stats();
+  result('ok','VÁLIDA',c);beep(880);navigator.vibrate&&navigator.vibrate(80);addHist(c,'OK');
+}
+$('bok').onclick=validar;
+$('code').addEventListener('keydown',e=>{if(e.key==='Enter')validar()});
+$('code').addEventListener('input',()=>{const v=$('code').value.trim();if(/^\d+$/.test(v)&&v.length===S.len)validar()});
+
+// Lista
+function render(){
+  const f=norm($('q').value),box=$('list'),all=Object.keys(S.codes);
+  if(!all.length){box.innerHTML='<div class="msg">Todavía no hay códigos. Generalos o importalos en la pestaña Generar.</div>';return}
+  const cs=all.filter(c=>c.includes(f));
+  box.innerHTML='';
+  cs.slice(0,200).forEach(c=>{
+    const d=document.createElement('div');d.className='item';
+    d.innerHTML=`<code>${c}</code><span class="tag ${S.codes[c]?'u':''}">${S.codes[c]?'usada '+hora(S.codes[c]):'libre'}</span><button class="mini">${S.codes[c]?'Liberar':'Marcar'}</button>`;
+    d.querySelector('button').onclick=()=>{S.codes[c]=S.codes[c]?0:Date.now();save();stats();render()};
+    box.appendChild(d);
+  });
+  if(cs.length>200){const m=document.createElement('div');m.className='msg';m.textContent='Mostrando 200 de '+cs.length+'. Usá el buscador.';box.appendChild(m)}
+}
+$('q').oninput=render;
+let armed=0;
+$('breset').onclick=()=>{
+  if(!armed){armed=1;$('breset').textContent='Tocá de nuevo para borrar todo';setTimeout(()=>{armed=0;$('breset').textContent='Borrar todo'},3000);return}
+  S.codes={};S.hist=[];save();armed=0;$('breset').textContent='Borrar todo';stats();render();drawHist();
+};
+
+// Generar
+$('bgen').onclick=()=>{
+  const n=Math.max(1,Math.min(1000,parseInt($('n').value)||1));
+  const len=Math.max(4,Math.min(8,parseInt($('len').value)||5));
+  const pre=norm($('pre').value).replace(/[^A-Z0-9]/g,'')||'RARO';
+  S.pre=pre;S.len=len;
+  const nuevos=[];
+  while(nuevos.length<n){
+    const s=rnd(len),c=pre+'-'+s;
+    if(S.codes[c]===undefined&&!Object.keys(S.codes).some(k=>k.endsWith('-'+s))){S.codes[c]=0;nuevos.push(c)}
+  }
+  save();
+  $('out').value=nuevos.join('\n');$('outc').style.display='block';
+  $('gmsg').textContent=nuevos.length+' códigos generados. También están en la pestaña Lista.';
+  $('outc').scrollIntoView({behavior:'smooth'});
+  stats();
+};
+$('bcopy').onclick=()=>{
+  const o=$('out');o.select();o.setSelectionRange(0,99999);
+  try{navigator.clipboard.writeText(o.value)}catch(e){document.execCommand('copy')}
+  $('bcopy').textContent='Copiado';setTimeout(()=>$('bcopy').textContent='Copiar lista',1500);
+};
+$('bimp').onclick=()=>{
+  let k=0;
+  $('imp').value.split(/[\s,;]+/).map(norm).filter(Boolean).forEach(c=>{if(S.codes[c]===undefined){S.codes[c]=0;k++}});
+  const first=Object.keys(S.codes)[0];if(first&&first.includes('-')){S.pre=first.split('-')[0];S.len=first.split('-').slice(1).join('-').length||S.len}
+  save();$('imp').value='';$('bimp').textContent=k+' importados';
+  setTimeout(()=>$('bimp').textContent='Importar códigos',1800);stats();
+};
+
+stats();render();drawHist();
+</script>
+</body>
+</html>
